@@ -11,6 +11,10 @@ public class GridCell : MonoBehaviour
     [SerializeField]
     public Image cellImage;
 
+    [SerializeField]
+    public int row;
+    public int col;
+
 
     // Start is called before the first frame update
     void Start()

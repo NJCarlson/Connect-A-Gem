@@ -31,7 +31,7 @@ public class GridManager : MonoBehaviour
     [SerializeField]
     public TMP_Text scoreText;
 
-    private int curDifficultyLevel = 1;
+    public int curDifficultyLevel = 1;
     private List<List<GameObject>>  grid = new List<List<GameObject>>(); //2D list of rows of cells
     private List<GameObject> allCells = new List<GameObject>(); //list of all cell game objects, used for cleanup purposes
 
@@ -41,7 +41,7 @@ public class GridManager : MonoBehaviour
     private int playerScore = 0;
     private int LevelGoal = 10;
 
-    private List<GameObject> selectedCells = new List<GameObject>();
+    private List<GridCell> selectedCells = new List<GridCell>();
 
     // Start is called before the first frame update
     void Start()
@@ -70,22 +70,28 @@ public class GridManager : MonoBehaviour
                 {
                     //Player won!
 
+                    if (curDifficultyLevel > 3)
+                    {
+                        //show restart button?
+                        //or allow user to keep going?
+                    }
+                    else
+                    {
+                        //show next level button
+                    }
+
+                    curDifficultyLevel++;
 
                 }
                 else
                 {
                     //player lost...
                     //show restart button
-
+                    curDifficultyLevel = 1;
                 }
 
             
 
-                if (curDifficultyLevel > 3)
-                {
-                    //show restart button
-                    //todo allow user to keep going?
-                }
 
             }
 
@@ -146,20 +152,120 @@ public class GridManager : MonoBehaviour
                 {
                     newCellType = UnityEngine.Random.Range(0, cellSprites.Length);
                 }
-                
+                cell.GetComponent<GridCell>().row = row;
+                cell.GetComponent<GridCell>().col = col;
                 cell.GetComponent<GridCell>().SetCellType((cellType)newCellType, cellSprites[newCellType]);
                 allCells.Add(cell); 
                 rowCells.Add(cell);
             }
             grid.Add(rowCells);
         }
-        
+
     }
 
+    /// <summary>
+    /// Check if all player selected cells are the same type.
+    /// 
+    /// </summary>
     public void CheckSelectedCells()
     {
+        int selectedCellType = -1;
+        GridCell prevCell = null;
 
+        foreach (var selectedCell in selectedCells)
+        {
+            if (selectedCellType == -1)
+            {
+                selectedCellType = (int)selectedCell.cellType;
+            }
+            else
+            {
+                if ((int)selectedCell.cellType == selectedCellType)
+                {
+                    if (!CheckForAdjacency(prevCell, selectedCell))
+                    {
+                        //cells aren't adjacent
+                        selectedCells.Clear();
 
+                        //todo play womp womp sound here
+
+                        return;
+                    } 
+                }
+                else 
+                { 
+                    //not all selected cells are of the same type!
+                    selectedCells.Clear();
+
+                    //todo play womp womp sound here
+
+                    return;
+                }
+            }
+
+            prevCell = selectedCell;
+        }
+
+        //if we've gotten this far, all cells are of the same type & connected. 
+        // Now check if there are any other possible connections that can be made.
+        bool allPossibleConnectionsMade = true;
+
+        if (selectedCells.Count >= 3)
+        {
+            foreach (var cellObj in allCells)
+            {
+                GridCell cell = cellObj.GetComponent<GridCell>();
+                if (cell != null) 
+                {
+                    if (!selectedCells.Contains(cell)) //check that this cell isn't selected
+                    {
+                        if ((int)cell.cellType == selectedCellType) //check if this is the selected type
+                        {                          
+                            foreach (var selectedCell in selectedCells)//check if the current cell is adjacent to any player selected cell
+                            {
+                                if (CheckForAdjacency(cell, selectedCell)) 
+                                {
+                                    allPossibleConnectionsMade = false;
+                                } 
+                            }
+
+                        }
+                    }
+                }
+            }
+
+            if (allPossibleConnectionsMade)
+            {
+                //if there are no more possible connections. Destroy selected cells and give player points & play good sound
+                playerScore += selectedCells.Count;
+
+                foreach (var cell in selectedCells)
+                {
+                    Destroy(cell.gameObject);
+                }
+
+                selectedCells.Clear();
+                
+                //todo play score sound
+
+            }
+            else
+            {  
+                //if there are more possible connections, do nothing - keep selected cells
+
+            }
+         
+
+        }
+
+    }
+
+    static bool CheckForAdjacency(GridCell cell1, GridCell cell2)
+    {
+        int rowDiff = Math.Abs(cell1.row - cell2.row);
+        int colDiff = Math.Abs(cell1.col - cell2.col);
+
+        return rowDiff <= 1 && colDiff <= 1;
     }
 
 }
