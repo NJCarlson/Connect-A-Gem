@@ -17,7 +17,7 @@ public class GridManager : MonoBehaviour
     int colSize = 6;
 
     [SerializeField]
-    float cellSize = 1.0f; // Set the size of each cell
+    float cellSize = 1.0f; // Set the size of each newCell
 
     [SerializeField]
     public Sprite[] cellSprites;
@@ -31,9 +31,18 @@ public class GridManager : MonoBehaviour
     [SerializeField]
     public TMP_Text scoreText;
 
+    [SerializeField]
+    public TMP_Text levelText;
+
+    [SerializeField]
+    public TMP_Text goalText;
+
+    [SerializeField]
+    public GameObject startButton;
+
     public int curDifficultyLevel = 1;
     private List<List<GameObject>>  grid = new List<List<GameObject>>(); //2D list of rows of cells
-    private List<GameObject> allCells = new List<GameObject>(); //list of all cell game objects, used for cleanup purposes
+    private List<GameObject> allCells = new List<GameObject>(); //list of all newCell game objects, used for cleanup purposes
 
     public bool timerRunning = false;
     public float timeLimit = 60.0f;
@@ -41,7 +50,7 @@ public class GridManager : MonoBehaviour
     private int playerScore = 0;
     private int LevelGoal = 10;
 
-    private List<GridCell> selectedCells = new List<GridCell>();
+    public List<GridCell> selectedCells = new List<GridCell>();
 
     // Start is called before the first frame update
     void Start()
@@ -96,10 +105,11 @@ public class GridManager : MonoBehaviour
             }
 
             //update UI text
-            timerText.text = timer.ToString();
-            scoreText.text = playerScore.ToString();
+            //timerText.text = timer.ToString();
+            //scoreText.text = playerScore.ToString();
 
-            //Check for player connected allCells
+            //Check for player connected Cells
+            CheckSelectedCells();
 
         }
 
@@ -137,7 +147,7 @@ public class GridManager : MonoBehaviour
                 Vector3 position = new Vector3(col * cellSize, -row * cellSize, 0f) + offset;
                 GameObject cell = Instantiate(gridCellPrefab, position, Quaternion.identity,this.transform);
 
-                //randomize cell type based on difficulty
+                //randomize newCell type based on difficulty
                 int newCellType=0;
 
                 if (difficultyLevel <= 1)
@@ -182,10 +192,10 @@ public class GridManager : MonoBehaviour
             {
                 if ((int)selectedCell.cellType == selectedCellType)
                 {
-                    if (!CheckForAdjacency(prevCell, selectedCell))
+                    if (!AreAllCellsAdjacent(selectedCells))
                     {
                         //cells aren't adjacent
-                        selectedCells.Clear();
+                        ClearSelectedCells();
 
                         //todo play womp womp sound here
 
@@ -193,9 +203,9 @@ public class GridManager : MonoBehaviour
                     } 
                 }
                 else 
-                { 
+                {
                     //not all selected cells are of the same type!
-                    selectedCells.Clear();
+                    ClearSelectedCells();
 
                     //todo play womp womp sound here
 
@@ -217,18 +227,15 @@ public class GridManager : MonoBehaviour
                 GridCell cell = cellObj.GetComponent<GridCell>();
                 if (cell != null) 
                 {
-                    if (!selectedCells.Contains(cell)) //check that this cell isn't selected
+                    if (!selectedCells.Contains(cell)) //check that this newCell isn't selected
                     {
                         if ((int)cell.cellType == selectedCellType) //check if this is the selected type
-                        {                          
-                            foreach (var selectedCell in selectedCells)//check if the current cell is adjacent to any player selected cell
+                        {
+                            if (CheckForAdjacency(cell, selectedCells))
                             {
-                                if (CheckForAdjacency(cell, selectedCell)) 
-                                {
-                                    allPossibleConnectionsMade = false;
-                                } 
-                            }
-
+                                allPossibleConnectionsMade = false;
+                                break;
+                            } 
                         }
                     }
                 }
@@ -241,6 +248,7 @@ public class GridManager : MonoBehaviour
 
                 foreach (var cell in selectedCells)
                 {
+                    allCells.Remove(cell.gameObject);
                     Destroy(cell.gameObject);
                 }
 
@@ -264,8 +272,77 @@ public class GridManager : MonoBehaviour
     {
         int rowDiff = Math.Abs(cell1.row - cell2.row);
         int colDiff = Math.Abs(cell1.col - cell2.col);
+        return (rowDiff == 1 && colDiff == 0) || (rowDiff == 0 && colDiff == 1);
+    }
 
-        return rowDiff <= 1 && colDiff <= 1;
+    //checks if one cell is adjacent to any in a given list.
+    static bool CheckForAdjacency(GridCell checkCell, List<GridCell> cellList)
+    {
+        bool valid = false;
+
+        foreach (var curCell in cellList)
+        {
+            if (CheckForAdjacency(checkCell, curCell))
+            {
+                valid = true; 
+                break;
+            }
+        }
+        return valid;
+    }
+
+    static bool AreAllCellsAdjacent(List<GridCell> cells)
+    {
+        for (int i = 0; i < cells.Count - 1; i++)
+        {
+            GridCell curCell = cells[i];
+      
+
+            if (!CheckForAdjacency(curCell,cells))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void ClearSelectedCells()
+    {
+        foreach (var cell in selectedCells) 
+        {
+            //reset visuals
+            cell.selected = false;
+        }
+
+        selectedCells.Clear();
+    }
+
+    public void SelectCell(GridCell newCell)
+    {
+        if (selectedCells.Count <= 0)
+        {
+            grid[newCell.row][newCell.col].GetComponent<GridCell>().selected = true;
+            selectedCells.Add(newCell);
+        }
+        else
+        {
+            bool valid = false;
+
+            valid = CheckForAdjacency(newCell, selectedCells);
+
+            if (valid)
+            {
+                grid[newCell.row][newCell.col].GetComponent<GridCell>().selected = true;
+                selectedCells.Add(newCell);
+            }
+            else
+            {
+                ClearSelectedCells();
+            }
+
+        }
+
     }
 
 }
