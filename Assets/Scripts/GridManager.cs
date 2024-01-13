@@ -28,6 +28,12 @@ public class GridManager : MonoBehaviour
     public GameObject gridCellPrefab;
 
     [SerializeField]
+    public GameObject ScoreBoardItemPrefab;
+
+    [SerializeField]
+    public GameObject ScoreBoardUI;
+
+    [SerializeField]
     public GameObject title;
 
     [SerializeField]
@@ -62,8 +68,10 @@ public class GridManager : MonoBehaviour
     [SerializeField]
     public GameObject youWinUI;
 
+    private List<ScoreBoardItem> scoreBoardItems;
 
-    public int curDifficultyLevel = 1;
+
+    public int curDifficultyLevel = 0;
     private List<List<GameObject>> grid = new List<List<GameObject>>(); //2D list of rows of cells
     private List<GameObject> allCells = new List<GameObject>(); //list of all newCell game objects, used for cleanup purposes
 
@@ -112,10 +120,10 @@ public class GridManager : MonoBehaviour
                 StartCoroutine(PlayWipeFX());
             }
 
-            if (playerScore > LevelGoal)
+            if (playerScore > LevelGoal && curDifficultyLevel < 3)
             {
                 curDifficultyLevel++;
-                LevelGoal = curDifficultyLevel * 10;
+                LevelGoal = curDifficultyLevel * 20;
                 StartCoroutine(LevelUp());
                 Debug.Log("Level Up!");
 
@@ -126,6 +134,7 @@ public class GridManager : MonoBehaviour
         {
             scoreUI.SetActive(false);
             timerUI.SetActive(false);
+            ScoreBoardUI.SetActive(false);
         }
 
 
@@ -141,6 +150,7 @@ public class GridManager : MonoBehaviour
             {
                 //Player won!
                 youWinUI.SetActive(true);
+               
             }
             else
             {
@@ -149,13 +159,14 @@ public class GridManager : MonoBehaviour
             }
 
             //save to scoreboard here
+            ScoreBoardUI.SetActive(true);
 
             startButton.SetActive(false);
 
             //reset
             ClearCells();
-            curDifficultyLevel = 1;
-            LevelGoal = curDifficultyLevel * 10;
+            curDifficultyLevel = 0;
+            LevelGoal = curDifficultyLevel * 20;
 
 
         }
@@ -177,7 +188,7 @@ public class GridManager : MonoBehaviour
 
         playerScore = 0;
 
-        LevelGoal = curDifficultyLevel * 10;
+        LevelGoal = curDifficultyLevel * 20;
 
         GenerateGrid(curDifficultyLevel);
         timer = 60;
