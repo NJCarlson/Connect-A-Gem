@@ -56,6 +56,13 @@ public class GridManager : MonoBehaviour
     [SerializeField]
     public GameObject startButton;
 
+    [SerializeField]
+    public GameObject gameOverUI;
+
+    [SerializeField]
+    public GameObject youWinUI;
+
+
     public int curDifficultyLevel = 1;
     private List<List<GameObject>> grid = new List<List<GameObject>>(); //2D list of rows of cells
     private List<GameObject> allCells = new List<GameObject>(); //list of all newCell game objects, used for cleanup purposes
@@ -133,21 +140,17 @@ public class GridManager : MonoBehaviour
             if (curDifficultyLevel >= 3)
             {
                 //Player won!
-
-                //show restart button?
-                //or allow user to keep going?
-
+                youWinUI.SetActive(true);
             }
             else
             {
                 //player lost...
-                //show restart button
-
+                gameOverUI.SetActive(true);
             }
 
             //save to scoreboard here
 
-            startButton.SetActive(true);
+            startButton.SetActive(false);
 
             //reset
             ClearCells();
