@@ -303,7 +303,9 @@ public class GridManager : MonoBehaviour
     {
         levelText.text = curDifficultyLevel.ToString();
         levelUpUI.SetActive(true);
-        yield return new WaitForSeconds(5f);
+        audioSource.clip = WinSound;
+        audioSource.Play();
+        yield return new WaitForSeconds(8f);
         levelUpUI.SetActive(false);
     }
 
