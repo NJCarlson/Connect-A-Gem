@@ -49,8 +49,6 @@ public class GridManager : MonoBehaviour
     [SerializeField]
     public GameObject wipeFX;
     [SerializeField]
-    public GameObject startButton;
-    [SerializeField]
     public GameObject gameOverUI;
     [SerializeField]
     public GameObject youWinUI;
@@ -98,12 +96,9 @@ public class GridManager : MonoBehaviour
 
         if (string.IsNullOrEmpty(playerName) && string.IsNullOrEmpty(nameInput.text))
         {
-            startButton.GetComponent<UnityEngine.UI.Button>().interactable = false;
+            playerName = "player";
         }
-        else
-        {
-            startButton.GetComponent<UnityEngine.UI.Button>().interactable = true;
-        }
+ 
 
         if (timerRunning)
         {

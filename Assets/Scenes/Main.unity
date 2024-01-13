@@ -81860,7 +81860,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 0
+  m_Interactable: 1
   m_TargetGraphic: {fileID: 1533538084}
   m_OnClick:
     m_PersistentCalls:
@@ -92514,7 +92514,6 @@ MonoBehaviour:
   feedbackUI: {fileID: 647187874}
   feedBackText: {fileID: 407423465}
   wipeFX: {fileID: 8217767010781591355}
-  startButton: {fileID: 1533538081}
   gameOverUI: {fileID: 7672307287844634908}
   youWinUI: {fileID: 1118952588}
   nameInput: {fileID: 1859706443}
