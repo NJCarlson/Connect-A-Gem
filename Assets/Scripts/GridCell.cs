@@ -14,13 +14,14 @@ public class GridCell : MonoBehaviour
     [SerializeField]
     public Image cellImage;
 
-    [SerializeField]
     public int row;
     public int col;
 
     public bool selected;
 
     GridManager gridManager;
+
+
 
     // Start is called before the first frame update
     void Start()

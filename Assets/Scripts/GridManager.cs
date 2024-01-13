@@ -13,81 +13,83 @@ public enum cellType { blue = 0, green = 1, purple = 2, yellow = 3, red = 4 };
 
 public class GridManager : MonoBehaviour
 {
-    [SerializeField]
-    int rowSize = 6;
-    [SerializeField]
-    int colSize = 6;
 
-    [SerializeField]
-    float cellSize = 1.0f; // Set the size of each newCell
 
+    //prefabs
     [SerializeField]
     public Sprite[] cellSprites;
-
     [SerializeField]
     public GameObject gridCellPrefab;
-
     [SerializeField]
     public GameObject ScoreBoardItemPrefab;
 
+    //UI Objects
     [SerializeField]
     public GameObject ScoreBoardUI;
     [SerializeField]
     public GameObject ScoreBoardContent;
-
     [SerializeField]
     public GameObject title;
-
     [SerializeField]
     public TMP_Text timerText;
     [SerializeField]
     public GameObject timerUI;
-
     [SerializeField]
     public GameObject scoreUI;
     [SerializeField]
     public TMP_Text scoreText;
-
     [SerializeField]
     public GameObject levelUpUI;
     [SerializeField]
     public TMP_Text levelText;
-
     [SerializeField]
     public GameObject feedbackUI;
     [SerializeField]
     public TMP_Text feedBackText;
-
     [SerializeField]
     public GameObject wipeFX;
-
     [SerializeField]
     public GameObject startButton;
-
     [SerializeField]
     public GameObject gameOverUI;
-
     [SerializeField]
     public GameObject youWinUI;
-
     [SerializeField]
     public TMP_InputField nameInput;
-    public string playerName;
 
-    public int curDifficultyLevel = 0;
+    //SFX
+    [SerializeField]
+    AudioClip clickSound;
+    [SerializeField]
+    AudioClip goodConnectSound;
+    [SerializeField]
+    AudioClip badConnectSound;
+    [SerializeField]
+    AudioClip WinSound;
+    [SerializeField]
+    AudioClip loseSound;
+    [SerializeField]
+    AudioClip wipeSound;
+
+    //private vars
+    private AudioSource audioSource;
+    private int rowSize = 6;
+    private int colSize = 6;
     private List<List<GameObject>> grid = new List<List<GameObject>>(); //2D list of rows of cells
     private List<GameObject> allCells = new List<GameObject>(); //list of all newCell game objects, used for cleanup purposes
-
-    public bool timerRunning = false;
-    public float timer = 60;
-    public int playerScore = 0;
     private int LevelGoal = 20;
     private bool wiping = false;
-    public List<GridCell> selectedCells = new List<GridCell>();
+    private List<GridCell> selectedCells = new List<GridCell>();
+    private float cellSize = 1.0f; // Set the size of each newCell
+    private string playerName;
+    private int curDifficultyLevel = 0;
+    private bool timerRunning = false;
+    private float timer = 60;
+    private int playerScore = 0;
 
     private void Start()
     {
-       
+        audioSource = this.GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -161,12 +163,17 @@ public class GridManager : MonoBehaviour
             {
                 //Player won!
                 youWinUI.SetActive(true);
-               
+                audioSource.clip = WinSound;
+                audioSource.Play();
+
+
             }
             else
             {
                 //player lost...
                 gameOverUI.SetActive(true);
+                audioSource.clip = loseSound;
+                audioSource.Play();
             }
 
             UpdateHighScores(playerName,playerScore, String.Format("{0:g}", DateTime.Now));
@@ -189,6 +196,8 @@ public class GridManager : MonoBehaviour
     {
         playerName = nameInput.text;
         ResetAndGenerateGrid();
+        audioSource.clip = clickSound;
+        audioSource.Play();
     }
 
     public void ResetAndGenerateGrid()
@@ -298,9 +307,18 @@ public class GridManager : MonoBehaviour
         levelUpUI.SetActive(false);
     }
 
+    private List<string> goodFeedBacks = new List<string>()
+    {
+        "Nice!",
+        "Great!",
+        "Awesome!",
+        "Rad!",
+        "Cool!",
+        "Sweet!"
+    };
     public IEnumerator DisplayGoodFeedback()
     {
-        feedBackText.text = "Nice!"; //todo randomize from a list
+        feedBackText.text = goodFeedBacks[UnityEngine.Random.Range(0,goodFeedBacks.Count)]; //todo randomize from a list
         feedbackUI.SetActive(true);
         yield return new WaitForSeconds(5f);
         feedbackUI.SetActive(false);
@@ -312,6 +330,8 @@ public class GridManager : MonoBehaviour
         wiping = true;
         wipeFX.SetActive(true);
         wipeFX.GetComponent<ParticleSystem>().Play();
+        audioSource.clip = wipeSound;
+        audioSource.Play();
         yield return new WaitForSeconds(.5f);
         ClearCells();
         yield return new WaitForSeconds(.5f);
@@ -347,6 +367,8 @@ public class GridManager : MonoBehaviour
                         ClearSelectedCells();
 
                         //todo play womp womp sound here
+                        audioSource.clip = badConnectSound;
+                        audioSource.Play();
 
                         return;
                     }
@@ -357,6 +379,8 @@ public class GridManager : MonoBehaviour
                     ClearSelectedCells();
 
                     //todo play womp womp sound here
+                    audioSource.clip = badConnectSound;
+                    audioSource.Play();
 
                     return;
                 }
@@ -404,6 +428,8 @@ public class GridManager : MonoBehaviour
                 }
 
                 selectedCells.Clear();
+                audioSource.clip = goodConnectSound;
+                audioSource.Play();
 
                 StartCoroutine(DisplayGoodFeedback());
 
@@ -540,6 +566,9 @@ public class GridManager : MonoBehaviour
         {
             grid[newCell.row][newCell.col].GetComponent<GridCell>().selected = true;
             selectedCells.Add(newCell);
+
+            audioSource.clip = clickSound;
+            audioSource.Play();
         }
         else
         {
@@ -551,6 +580,8 @@ public class GridManager : MonoBehaviour
             {
                 grid[newCell.row][newCell.col].GetComponent<GridCell>().selected = true;
                 selectedCells.Add(newCell);
+                audioSource.clip = clickSound;
+                audioSource.Play();
             }
             else
             {
