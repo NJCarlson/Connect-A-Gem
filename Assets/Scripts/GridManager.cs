@@ -71,36 +71,31 @@ public class GridManager : MonoBehaviour
             if (timer >= timeLimit)
             {
                 //game over!
+                Debug.Log("Game Over!");
                 timerRunning = false;
                 timer = 0;
 
-                //save to scoreboard here
-
-                if (playerScore > LevelGoal)
+                if (curDifficultyLevel >= 3)
                 {
                     //Player won!
 
-                    if (curDifficultyLevel > 3)
-                    {
-                        //show restart button?
-                        //or allow user to keep going?
-                    }
-                    else
-                    {
-                        //show next level button
-                    }
-
-                    curDifficultyLevel++;
+                    //show restart button?
+                    //or allow user to keep going?
 
                 }
                 else
                 {
                     //player lost...
                     //show restart button
-                    curDifficultyLevel = 1;
+                  
                 }
 
+                //save to scoreboard here
 
+                //reset
+                ClearCells();
+                curDifficultyLevel = 1;
+                LevelGoal = curDifficultyLevel * 10;
 
 
             }
@@ -114,14 +109,24 @@ public class GridManager : MonoBehaviour
 
             if (!GridHasConnections())
             {
-                Debug.Log("no more connections");
+                Debug.Log("no more connections!");
+                ClearCells();
+                GenerateGrid(curDifficultyLevel);
+            }
+
+            if (playerScore > LevelGoal)
+            {
+                curDifficultyLevel++;
+                LevelGoal = curDifficultyLevel * 10;
+                Debug.Log("Level Up!");
+
             }
 
         }
 
     }
 
-    public void StartGameButton()
+    public void ResetAndGenerateGrid()
     {
         foreach (var cell in allCells)
         {
@@ -139,6 +144,19 @@ public class GridManager : MonoBehaviour
         GenerateGrid(curDifficultyLevel);
         timer = 0;
         timerRunning = true;
+    }
+
+    public void ClearCells()
+    {
+        foreach (var cell in allCells)
+        {
+            Destroy(cell.gameObject);
+        }
+
+        grid.Clear();
+        allCells.Clear();
+        selectedCells.Clear();
+
     }
 
     public void GenerateGrid(int difficultyLevel)
@@ -252,11 +270,12 @@ public class GridManager : MonoBehaviour
             {
                 //if there are no more possible connections. Destroy selected cells and give player points & play good sound
                 playerScore += selectedCells.Count;
+                Debug.Log("Player Score : " + playerScore);
 
                 foreach (var cell in selectedCells)
                 {
-                   // grid[cell.row].RemoveAt(cell.col);
-                   // allCells.Remove(cell.gameObject);
+                    // grid[cell.row].RemoveAt(cell.col);
+                    // allCells.Remove(cell.gameObject);
                     cell.gameObject.SetActive(false);
                 }
 
@@ -280,7 +299,6 @@ public class GridManager : MonoBehaviour
     {
         return row >= 0 && row < grid.Count && col >= 0 && col < grid[row].Count && grid[row][col].activeSelf;
     }
-
 
     //checks if two cells are adjacent
     static bool CheckForAdjacency(GridCell cell1, GridCell cell2)
