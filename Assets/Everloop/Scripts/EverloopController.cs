@@ -23,7 +23,7 @@ public class EverloopController : MonoBehaviour {
 			}
 		}
 	}
-	private float _volume = 0.8f;
+	private float _volume = 0.25f;
 
 	public bool fadeInOnStart = false;
 	public float masterFadeDuration = 1f;
