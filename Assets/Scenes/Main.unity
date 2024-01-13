@@ -507,7 +507,7 @@ GameObject:
   - component: {fileID: 1447067477}
   - component: {fileID: 1447067476}
   m_Layer: 5
-  m_Name: Button
+  m_Name: Start Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -580,7 +580,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1899931075}
         m_TargetAssemblyTypeName: GridManager, Assembly-CSharp
-        m_MethodName: StartGameButton
+        m_MethodName: ResetAndGenerateGrid
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -755,3 +755,12 @@ MonoBehaviour:
   - {fileID: 21300000, guid: abf9fed3a69151745be0e7a46fec0e4b, type: 3}
   - {fileID: 21300000, guid: 68d6575c015daac4ca6a72f96f7b447b, type: 3}
   gridCellPrefab: {fileID: 1291772346635365782, guid: db060c1ad347c724d8416b62a9d3746f, type: 3}
+  timerText: {fileID: 0}
+  scoreText: {fileID: 0}
+  levelText: {fileID: 0}
+  goalText: {fileID: 0}
+  startButton: {fileID: 1447067474}
+  curDifficultyLevel: 1
+  timerRunning: 0
+  timeLimit: 60
+  selectedCells: []

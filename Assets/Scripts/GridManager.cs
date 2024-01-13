@@ -67,39 +67,7 @@ public class GridManager : MonoBehaviour
             //update timer
             timer += Time.deltaTime;
 
-            //check for time limit
-            if (timer >= timeLimit)
-            {
-                //game over!
-                Debug.Log("Game Over!");
-                timerRunning = false;
-                timer = 0;
-
-                if (curDifficultyLevel >= 3)
-                {
-                    //Player won!
-
-                    //show restart button?
-                    //or allow user to keep going?
-
-                }
-                else
-                {
-                    //player lost...
-                    //show restart button
-                  
-                }
-
-                //save to scoreboard here
-
-                //reset
-                ClearCells();
-                curDifficultyLevel = 1;
-                LevelGoal = curDifficultyLevel * 10;
-
-
-            }
-
+         
             //update UI text
             //timerText.text = timer.ToString();
             //scoreText.text = playerScore.ToString();
@@ -123,11 +91,47 @@ public class GridManager : MonoBehaviour
             }
 
         }
+        //check for time limit
+        if (timer >= timeLimit)
+        {
+            //game over!
+            Debug.Log("Game Over!");
+            timerRunning = false;
+            timer = 0;
+
+            if (curDifficultyLevel >= 3)
+            {
+                //Player won!
+
+                //show restart button?
+                //or allow user to keep going?
+
+            }
+            else
+            {
+                //player lost...
+                //show restart button
+
+            }
+
+            //save to scoreboard here
+
+            startButton.SetActive(true);
+
+            //reset
+            ClearCells();
+            curDifficultyLevel = 1;
+            LevelGoal = curDifficultyLevel * 10;
+
+
+        }
 
     }
 
     public void ResetAndGenerateGrid()
-    {
+    { 
+        startButton.SetActive(false);
+
         foreach (var cell in allCells)
         {
             Destroy(cell.gameObject);
@@ -404,6 +408,11 @@ public class GridManager : MonoBehaviour
     //called when a cell is clicked
     public void SelectCell(GridCell newCell)
     {
+        if (!timerRunning)
+        {
+            return;
+        }
+
         if (selectedCells.Count <= 0)
         {
             grid[newCell.row][newCell.col].GetComponent<GridCell>().selected = true;
