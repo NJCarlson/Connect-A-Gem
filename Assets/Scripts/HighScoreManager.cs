@@ -13,6 +13,7 @@ public class HighScoreManager : MonoBehaviour
         string json = JsonUtility.ToJson(new HighScoreList(highScores));
 
         PlayerPrefs.DeleteAll();
+        PlayerPrefs.Save();
 
         // Save the JSON string to PlayerPrefs
         PlayerPrefs.SetString(PlayerPrefsKey, json);

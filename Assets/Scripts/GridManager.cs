@@ -79,12 +79,16 @@ public class GridManager : MonoBehaviour
     private List<GameObject> allCells = new List<GameObject>(); //list of all newCell game objects, used for cleanup purposes
 
     public bool timerRunning = false;
-    private float timer = 60;
-    private int playerScore = 0;
-    private int LevelGoal = 10;
+    public float timer = 60;
+    public int playerScore = 0;
+    private int LevelGoal = 20;
     private bool wiping = false;
     public List<GridCell> selectedCells = new List<GridCell>();
 
+    private void Start()
+    {
+       
+    }
 
     // Update is called once per frame
     void Update()
@@ -128,10 +132,10 @@ public class GridManager : MonoBehaviour
                 StartCoroutine(PlayWipeFX());
             }
 
-            if (playerScore > LevelGoal && curDifficultyLevel < 3)
+            if (playerScore >= LevelGoal && curDifficultyLevel < 3)
             {
                 curDifficultyLevel++;
-                LevelGoal = curDifficultyLevel * 20;
+                UpdateLevelGoal();
                 StartCoroutine(LevelUp());
                 Debug.Log("Level Up!");
 
@@ -142,7 +146,6 @@ public class GridManager : MonoBehaviour
         {
             scoreUI.SetActive(false);
             timerUI.SetActive(false);
-            ScoreBoardUI.SetActive(false);
         }
 
 
@@ -154,7 +157,7 @@ public class GridManager : MonoBehaviour
             timerRunning = false;
             timer = 60;
 
-            if (curDifficultyLevel >= 3)
+            if (curDifficultyLevel >= 2)
             {
                 //Player won!
                 youWinUI.SetActive(true);
@@ -175,7 +178,7 @@ public class GridManager : MonoBehaviour
             //reset
             ClearCells();
             curDifficultyLevel = 0;
-            LevelGoal = curDifficultyLevel * 20;
+            UpdateLevelGoal();
 
 
         }
@@ -202,11 +205,31 @@ public class GridManager : MonoBehaviour
 
         playerScore = 0;
 
-        LevelGoal = curDifficultyLevel * 20;
+        UpdateLevelGoal();
+       
 
         GenerateGrid(curDifficultyLevel);
         timer = 60;
         timerRunning = true;
+    }
+
+    public void UpdateLevelGoal()
+    {
+        if (curDifficultyLevel <= 0)
+        {
+            LevelGoal = 20;
+        }
+
+        if (curDifficultyLevel == 1)
+        {
+            LevelGoal = 40;
+        }
+
+        if (curDifficultyLevel == 2)
+        {
+            LevelGoal = 60;
+        }
+
     }
 
     public void ClearCells()
@@ -238,15 +261,15 @@ public class GridManager : MonoBehaviour
                 //randomize newCell type based on difficulty
                 int newCellType = 0;
 
-                if (difficultyLevel <= 1)
+                if (difficultyLevel == 0)
                 {
                     newCellType = UnityEngine.Random.Range(0, cellSprites.Length - 2);
                 }
-                else if (difficultyLevel == 2)
+                else if (difficultyLevel == 1)
                 {
                     newCellType = UnityEngine.Random.Range(0, cellSprites.Length - 1);
                 }
-                else if (difficultyLevel >= 3)
+                else if (difficultyLevel >= 2)
                 {
                     newCellType = UnityEngine.Random.Range(0, cellSprites.Length);
                 }
@@ -556,9 +579,9 @@ public class GridManager : MonoBehaviour
         allHighScores = HighScoreManager.LoadHighScores();
 
         //clear old score ui objects
-        while (ScoreBoardContent.transform.childCount != 0)
+        foreach (Transform child in ScoreBoardContent.transform)
         {
-            Destroy(ScoreBoardContent.transform.GetChild(0).gameObject);
+            Destroy(child.gameObject);
         }
 
         //create new score ui objects
@@ -567,6 +590,7 @@ public class GridManager : MonoBehaviour
             GameObject newScoreBoardObj = GameObject.Instantiate(ScoreBoardItemPrefab, ScoreBoardContent.transform);
             ScoreBoardItem newScoreBoardItem = newScoreBoardObj.GetComponent<ScoreBoardItem>();
             newScoreBoardItem.name = score.playerName;
+            newScoreBoardItem.m_name = score.playerName;
             newScoreBoardItem.score = score.score;
             newScoreBoardItem.date = score.date;
         }
