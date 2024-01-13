@@ -32,6 +32,8 @@ public class GridManager : MonoBehaviour
 
     [SerializeField]
     public GameObject ScoreBoardUI;
+    [SerializeField]
+    public GameObject ScoreBoardContent;
 
     [SerializeField]
     public GameObject title;
@@ -68,8 +70,9 @@ public class GridManager : MonoBehaviour
     [SerializeField]
     public GameObject youWinUI;
 
-    private List<ScoreBoardItem> scoreBoardItems;
-
+    [SerializeField]
+    public TMP_InputField nameInput;
+    public string playerName;
 
     public int curDifficultyLevel = 0;
     private List<List<GameObject>> grid = new List<List<GameObject>>(); //2D list of rows of cells
@@ -82,15 +85,20 @@ public class GridManager : MonoBehaviour
     private bool wiping = false;
     public List<GridCell> selectedCells = new List<GridCell>();
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
 
     // Update is called once per frame
     void Update()
     {
+
+        if (string.IsNullOrEmpty(playerName) && string.IsNullOrEmpty(nameInput.text))
+        {
+            startButton.GetComponent<UnityEngine.UI.Button>().interactable = false;
+        }
+        else
+        {
+            startButton.GetComponent<UnityEngine.UI.Button>().interactable = true;
+        }
+
         if (timerRunning)
         {
 
@@ -158,10 +166,11 @@ public class GridManager : MonoBehaviour
                 gameOverUI.SetActive(true);
             }
 
+            UpdateHighScores(playerName,playerScore, String.Format("{0:g}", DateTime.Now));
+
             //save to scoreboard here
             ScoreBoardUI.SetActive(true);
 
-            startButton.SetActive(false);
 
             //reset
             ClearCells();
@@ -173,10 +182,15 @@ public class GridManager : MonoBehaviour
 
     }
 
+    public void StartGame()
+    {
+        playerName = nameInput.text;
+        ResetAndGenerateGrid();
+    }
+
     public void ResetAndGenerateGrid()
     {
-        startButton.SetActive(false);
-
+        title.SetActive(false);
         foreach (var cell in allCells)
         {
             Destroy(cell.gameObject);
@@ -520,6 +534,41 @@ public class GridManager : MonoBehaviour
                 ClearSelectedCells();
             }
 
+        }
+
+    }
+
+
+    public void UpdateHighScores(string newName, int newScore, string newDate)
+    {
+        List<HighScoreEntry> allHighScores = HighScoreManager.LoadHighScores();
+        allHighScores.Add(new HighScoreEntry { date = newDate, playerName = newName, score = newScore });
+
+        // Sort the high scores by score in descending order
+        allHighScores.Sort((a, b) => b.score.CompareTo(a.score));
+
+        // Take the top 5 scores or fewer if there are less than 5
+        int count = Mathf.Min(5, allHighScores.Count);
+        List<HighScoreEntry> top5HighScores = allHighScores.GetRange(0, count);
+
+        //save top 5
+        HighScoreManager.SaveHighScores(top5HighScores);
+        allHighScores = HighScoreManager.LoadHighScores();
+
+        //clear old score ui objects
+        while (ScoreBoardContent.transform.childCount != 0)
+        {
+            Destroy(ScoreBoardContent.transform.GetChild(0).gameObject);
+        }
+
+        //create new score ui objects
+        foreach (var score in allHighScores)
+        {
+            GameObject newScoreBoardObj = GameObject.Instantiate(ScoreBoardItemPrefab, ScoreBoardContent.transform);
+            ScoreBoardItem newScoreBoardItem = newScoreBoardObj.GetComponent<ScoreBoardItem>();
+            newScoreBoardItem.name = score.playerName;
+            newScoreBoardItem.score = score.score;
+            newScoreBoardItem.date = score.date;
         }
 
     }

@@ -8,7 +8,7 @@ public class ScoreBoardItem : MonoBehaviour
 
     public string m_name;
     public string date;
-    public string score;
+    public int score;
 
     [SerializeField]
     public TMP_Text scoreText;
@@ -28,7 +28,7 @@ public class ScoreBoardItem : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        scoreText.text = score;
+        scoreText.text = score.ToString();
         nameText.text = m_name;
         dateText.text = date;
     }
