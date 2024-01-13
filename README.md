@@ -1,6 +1,10 @@
 # Connect-A-Gem!
  A 2D Matching Puzzle Game! Can you get a high score!?
 
+ ![Screenshot00](https://github.com/NJCarlson/Connect-A-Gem/assets/19143448/a0fbf10c-3139-41b3-9ade-d6337a233056)
+![Screenshot03](https://github.com/NJCarlson/Connect-A-Gem/assets/19143448/8441c68b-a25f-4da9-8864-bef034f0403c)
+
+
 # Notes:
 
 - The grid of gems is randomly generated! 
