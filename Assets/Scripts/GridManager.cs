@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
 using TMPro;
 using Unity.VisualScripting;
@@ -27,16 +28,30 @@ public class GridManager : MonoBehaviour
     public GameObject gridCellPrefab;
 
     [SerializeField]
-    public TMP_Text timerText;
+    public GameObject title;
 
+    [SerializeField]
+    public TMP_Text timerText;
+    [SerializeField]
+    public GameObject timerUI;
+
+    [SerializeField]
+    public GameObject scoreUI;
     [SerializeField]
     public TMP_Text scoreText;
 
     [SerializeField]
+    public GameObject levelUpUI;
+    [SerializeField]
     public TMP_Text levelText;
 
     [SerializeField]
-    public TMP_Text goalText;
+    public GameObject feedbackUI;
+    [SerializeField]
+    public TMP_Text feedBackText;
+
+    [SerializeField]
+    public GameObject wipeFX;
 
     [SerializeField]
     public GameObject startButton;
@@ -46,11 +61,10 @@ public class GridManager : MonoBehaviour
     private List<GameObject> allCells = new List<GameObject>(); //list of all newCell game objects, used for cleanup purposes
 
     public bool timerRunning = false;
-    public float timeLimit = 60.0f;
-    private float timer = 0;
+    private float timer = 60;
     private int playerScore = 0;
     private int LevelGoal = 10;
-
+    private bool wiping = false;
     public List<GridCell> selectedCells = new List<GridCell>();
 
     // Start is called before the first frame update
@@ -64,40 +78,57 @@ public class GridManager : MonoBehaviour
     {
         if (timerRunning)
         {
-            //update timer
-            timer += Time.deltaTime;
 
-         
+            scoreUI.SetActive(true);
+            timerUI.SetActive(true);
+            title.SetActive(false);
+
+            //update timer
+            timer -= Time.deltaTime;
+
+            if (timer < 0.0f)
+            {
+                timer = 0.0f;
+            }
+
             //update UI text
-            //timerText.text = timer.ToString();
+            timerText.text = timer.ToString("00.00");
             scoreText.text = playerScore.ToString();
 
             //Check for player connected Cells
             CheckSelectedCells();
 
-            if (!GridHasConnections())
+            if (!GridHasConnections() && !wiping)
             {
+                wiping = true;
                 Debug.Log("no more connections!");
-                ClearCells();
-                GenerateGrid(curDifficultyLevel);
+                StartCoroutine(PlayWipeFX());
             }
 
             if (playerScore > LevelGoal)
             {
                 curDifficultyLevel++;
                 LevelGoal = curDifficultyLevel * 10;
+                StartCoroutine(LevelUp());
                 Debug.Log("Level Up!");
 
             }
 
         }
+        else
+        {
+            scoreUI.SetActive(false);
+            timerUI.SetActive(false);
+        }
+
+
         //check for time limit
-        if (timer >= timeLimit)
+        if (timer <= 0)
         {
             //game over!
             Debug.Log("Game Over!");
             timerRunning = false;
-            timer = 0;
+            timer = 60;
 
             if (curDifficultyLevel >= 3)
             {
@@ -129,7 +160,7 @@ public class GridManager : MonoBehaviour
     }
 
     public void ResetAndGenerateGrid()
-    { 
+    {
         startButton.SetActive(false);
 
         foreach (var cell in allCells)
@@ -146,7 +177,7 @@ public class GridManager : MonoBehaviour
         LevelGoal = curDifficultyLevel * 10;
 
         GenerateGrid(curDifficultyLevel);
-        timer = 0;
+        timer = 60;
         timerRunning = true;
     }
 
@@ -200,11 +231,49 @@ public class GridManager : MonoBehaviour
             grid.Add(rowCells);
         }
 
+        if (!GridHasConnections())
+        {
+            ClearCells();
+            GenerateGrid(curDifficultyLevel);
+        }
+
+    }
+
+    public IEnumerator LevelUp()
+    {
+        levelText.text = curDifficultyLevel.ToString();
+        levelUpUI.SetActive(true);
+        yield return new WaitForSeconds(5f);
+        levelUpUI.SetActive(false);
+    }
+
+    public IEnumerator DisplayGoodFeedback()
+    {
+        feedBackText.text = "Nice!"; //todo randomize from a list
+        feedbackUI.SetActive(true);
+        yield return new WaitForSeconds(5f);
+        feedbackUI.SetActive(false);
+    }
+
+    public IEnumerator PlayWipeFX()
+    {
+        timerRunning = false;
+        wiping = true;
+        wipeFX.SetActive(true);
+        wipeFX.GetComponent<ParticleSystem>().Play();
+        yield return new WaitForSeconds(.5f);
+        ClearCells();
+        yield return new WaitForSeconds(.5f);
+        GenerateGrid(curDifficultyLevel);
+        timerRunning = true;
+        yield return new WaitForSeconds(1.1f);
+        wipeFX.SetActive(false);
+        wiping = false;
+        
     }
 
     /// <summary>
-    /// Check if all player selected cells are the same type.
-    /// 
+    /// Check player selected cells
     /// </summary>
     public void CheckSelectedCells()
     {
@@ -285,6 +354,8 @@ public class GridManager : MonoBehaviour
 
                 selectedCells.Clear();
 
+                StartCoroutine(DisplayGoodFeedback());
+
                 //todo play score sound
 
             }
@@ -299,6 +370,7 @@ public class GridManager : MonoBehaviour
 
     }
 
+    //checks if cell exists and is active
     private bool IsValidCell(int row, int col)
     {
         return row >= 0 && row < grid.Count && col >= 0 && col < grid[row].Count && grid[row][col].activeSelf;
