@@ -70,7 +70,7 @@ public class GridManager : MonoBehaviour
          
             //update UI text
             //timerText.text = timer.ToString();
-            //scoreText.text = playerScore.ToString();
+            scoreText.text = playerScore.ToString();
 
             //Check for player connected Cells
             CheckSelectedCells();
